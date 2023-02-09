@@ -1,4 +1,6 @@
+import configparser
 import datetime
+import importlib.resources as pkg_resources
 import json
 import pathlib
 import threading
@@ -8,20 +10,11 @@ from discord import app_commands
 from discord.ext import commands
 
 import Myview
+from config import ConfigParser
 
-# 找到json檔案的路徑
-path = pathlib.Path(__file__).parent.absolute()
-
-
-# 讀取環境變數
-with open(str(path) + "/env.json") as f:
-    appData = json.load(f)
-
-
-CLIENT_ID = appData["CLIENT_ID"]
-GUILD_ID = appData["GUILD_ID"]
-TOKEN = appData["TOKEN"]
-
+CLIENT_ID = ConfigParser()["appData"]["CLIENT_ID"]
+GUILD_ID = ConfigParser()["appData"]["GUILD_ID"]
+TOKEN = ConfigParser()["appData"]["TOKEN"]
 
 # 本來用來做錄音 但是沒有成功 現在沒有用
 re_list = []
@@ -32,8 +25,8 @@ embed = discord.Embed()
 
 # 設定client intents
 intents = discord.Intents.default()
-intents.message_content = True ## 機器人會收到訊息內容
-intents.members = True ## 機器人會收到成員訊息
+intents.message_content = True  ## 機器人會收到訊息內容
+intents.members = True  ## 機器人會收到成員訊息
 
 
 # 初始化改寫過的client  Myclient 繼承 discord.Client   ( type(Myclient) = type(discord.Client) )
@@ -58,6 +51,7 @@ async def ping(interaction):
 @tree.command(name="hello", description="Replies with hello", guild=discord.Object(id=GUILD_ID))
 async def hello(interaction):
     await interaction.response.send_message("hello")
+
 
 """
 # 執行請假流程 輸入/leave 回傳請假表單
@@ -121,24 +115,24 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    leavelist=Myview.get_leve_list()
-    today=datetime.datetime.now().strftime("%Y-%m-%d")
-    
-    if "@" in message.content: ### 只讓有@的訊息進入迴圈@
-        memberlist=[]
+    leavelist = Myview.get_leve_list()
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+
+    if "@" in message.content:  ### 只讓有@的訊息進入迴圈@
+        memberlist = []
         for i in client.guilds:
             if int(i.id) == int(GUILD_ID):
-                memberlist=i.members
+                memberlist = i.members
 
         for i in memberlist:
-            if (f"@{i.id}") in str(message.content):### 如果訊息內有 @人名
-                channellist=client.get_all_channels()
-                for j in channellist: #找頻道
-                    if j.name=='出缺勤' :
-                        channel=j
+            if (f"@{i.id}") in str(message.content):  ### 如果訊息內有 @人名
+                channellist = client.get_all_channels()
+                for j in channellist:  # 找頻道
+                    if j.name == "出缺勤":
+                        channel = j
                         break
-                for j in leavelist:  #確認是否有請假
-                    if ( j['user'] == str(i) ) & ( j['date'] == today ):
+                for j in leavelist:  # 確認是否有請假
+                    if (j["user"] == str(i)) & (j["date"] == today):
                         await channel.send(f"{i.name} 今天已經請假了")
                         return
     pass

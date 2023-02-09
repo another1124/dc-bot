@@ -1,0 +1,12 @@
+[appData]
+CLIENT_ID = 
+GUILD_ID = 
+TOKEN = 
+
+[image]
+dice_1_url = "https://media.discordapp.net/attachments/774950219669307397/1069858458163228702/1.png?width=467&height=467"
+dice_2_url = "https://media.discordapp.net/attachments/774950219669307397/1069858458456838154/2.png?width=467&height=467"
+dice_3_url = "https://media.discordapp.net/attachments/774950219669307397/1069858458716876840/3.png?width=467&height=467"
+dice_4_url = "https://media.discordapp.net/attachments/774950219669307397/1069858458905628722/4.png?width=467&height=467"
+dice_5_url = "https://media.discordapp.net/attachments/774950219669307397/1069858459106934844/5.png?width=467&height=467"
+dice_6_url = "https://media.discordapp.net/attachments/774950219669307397/1069858459333439498/6.png?width=467&height=467"

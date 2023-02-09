@@ -1,4 +1,5 @@
 venv
+config/config.ini
 .backup/
 .conda/
 .vscode/

@@ -6,13 +6,14 @@ import discord
 from discord.ext import commands, tasks
 from discord.ui import Button, Modal, Select, TextInput, View
 
+from config import ConfigParser
+
 embed = discord.Embed()
 leavelist = []  # 假單列表
 
+
 def get_leve_list():  # 回傳假單列表
     return leavelist
-
-
 
 
 # 假單
@@ -103,109 +104,104 @@ class menu(View):
     # 猜拳
     @discord.ui.button(label="mora", style=discord.ButtonStyle.red)
     async def mora(self, interaction, button):
-        embed=discord.Embed(title="猜拳",description="參加人員:")
-        v=joinmora(embed=embed)
-        await interaction.response.send_message(view=v,embed=embed)
-    
-    #假單
+        embed = discord.Embed(title="猜拳", description="參加人員:")
+        v = joinmora(embed=embed)
+        await interaction.response.send_message(view=v, embed=embed)
+
+    # 假單
     @discord.ui.button(label="leave form", style=discord.ButtonStyle.red)
     async def leave(self, interaction, button):
         await interaction.response.send_modal(leavemodal())
 
-    #查詢請假人員
+    # 查詢請假人員
     @discord.ui.button(label="check leave", style=discord.ButtonStyle.red)
     async def checkleave(self, interaction, button):
-        count=0
-        today=datetime.datetime.now().strftime("%Y-%m-%d")
+        count = 0
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
         for i in leavelist:
             if i["date"] == today:
-                count+=1
-                await interaction.response.send_message(f"姓名:{i['user']} \n日期:{i['date']} \n原因:{i['reason']}\n\n",ephemeral=True)
-        if count==0:
-            await interaction.response.send_message("今天沒有人請假",ephemeral=True)
+                count += 1
+                await interaction.response.send_message(
+                    f"姓名:{i['user']} \n日期:{i['date']} \n原因:{i['reason']}\n\n", ephemeral=True
+                )
+        if count == 0:
+            await interaction.response.send_message("今天沒有人請假", ephemeral=True)
 
 
 # 猜拳
 class joinmora(View):
-    def __init__(self,embed):
+    def __init__(self, embed):
         super().__init__()
-        self.embed=embed
-        self.moralist=[]  # 猜拳列表
-        self.joinuser=[]  # 參加人員列表
-        self.submitlist=[]  # 已經出拳的人員列表
+        self.embed = embed
+        self.moralist = []  # 猜拳列表
+        self.joinuser = []  # 參加人員列表
+        self.submitlist = []  # 已經出拳的人員列表
+
     def gameset(self):
-            out=""
-            for i in range(len(self.moralist)):
-                out+=f"{self.moralist[i]['user']}:{self.moralist[i]['value']}\n"
-                
-            self.joinuser.clear()
-            self.submitlist.clear()
-            self.moralist.clear()
-            return out
+        out = ""
+        for i in range(len(self.moralist)):
+            out += f"{self.moralist[i]['user']}:{self.moralist[i]['value']}\n"
 
-    @discord.ui.button(label="剪刀",style=discord.ButtonStyle.red)
-    async def scissors(self,interaction,button):
+        self.joinuser.clear()
+        self.submitlist.clear()
+        self.moralist.clear()
+        return out
+
+    @discord.ui.button(label="剪刀", style=discord.ButtonStyle.red)
+    async def scissors(self, interaction, button):
         if str(interaction.user) not in self.joinuser:
-            await interaction.response.send_message("你沒有參加遊戲",ephemeral=True)
+            await interaction.response.send_message("你沒有參加遊戲", ephemeral=True)
             return
         if str(interaction.user) not in self.submitlist:
             self.submitlist.append(str(interaction.user))
-            self.moralist.append({
-                    "user":str(interaction.user),
-                    "value":"剪刀"
-                })
-            if len(self.submitlist)==len(self.joinuser):
-                await interaction.response.send_message("遊戲結束\n"+self.gameset())
+            self.moralist.append({"user": str(interaction.user), "value": "剪刀"})
+            if len(self.submitlist) == len(self.joinuser):
+                await interaction.response.send_message("遊戲結束\n" + self.gameset())
             else:
-                await interaction.response.send_message("等待其他人",ephemeral=True)
+                await interaction.response.send_message("等待其他人", ephemeral=True)
         else:
-            await interaction.response.send_message("你已經出過拳了",ephemeral=True)
-    @discord.ui.button(label="石頭",style=discord.ButtonStyle.red)
-    async def rock(self,interaction,button):
+            await interaction.response.send_message("你已經出過拳了", ephemeral=True)
+
+    @discord.ui.button(label="石頭", style=discord.ButtonStyle.red)
+    async def rock(self, interaction, button):
         if str(interaction.user) not in self.joinuser:
-            await interaction.response.send_message("你沒有參加遊戲",ephemeral=True)
+            await interaction.response.send_message("你沒有參加遊戲", ephemeral=True)
             return
         if str(interaction.user) not in self.submitlist:
             self.submitlist.append(str(interaction.user))
-            self.moralist.append({
-                    "user":str(interaction.user),
-                    "value":"石頭"
-                })
+            self.moralist.append({"user": str(interaction.user), "value": "石頭"})
 
-            if len(self.submitlist)==len(self.joinuser):
-                await interaction.response.send_message("遊戲結束\n"+self.gameset())
+            if len(self.submitlist) == len(self.joinuser):
+                await interaction.response.send_message("遊戲結束\n" + self.gameset())
             else:
-                await interaction.response.send_message("等待其他人",ephemeral=True)
+                await interaction.response.send_message("等待其他人", ephemeral=True)
         else:
-            await interaction.response.send_message("你已經出過拳了",ephemeral=True)
-    @discord.ui.button(label="布",style=discord.ButtonStyle.red)
-    async def paper(self,interaction,button):
+            await interaction.response.send_message("你已經出過拳了", ephemeral=True)
+
+    @discord.ui.button(label="布", style=discord.ButtonStyle.red)
+    async def paper(self, interaction, button):
         if str(interaction.user) not in self.joinuser:
-            await interaction.response.send_message("你沒有參加遊戲",ephemeral=True)
+            await interaction.response.send_message("你沒有參加遊戲", ephemeral=True)
             return
         if str(interaction.user) not in self.submitlist:
             self.submitlist.append(str(interaction.user))
-            self.moralist.append({
-                    "user":str(interaction.user),
-                    "value":"布"
-                })
-            if len(self.submitlist)==len(self.joinuser):
-                await interaction.response.send_message("遊戲結束\n"+self.gameset())
+            self.moralist.append({"user": str(interaction.user), "value": "布"})
+            if len(self.submitlist) == len(self.joinuser):
+                await interaction.response.send_message("遊戲結束\n" + self.gameset())
             else:
-                await interaction.response.send_message("等待其他人",ephemeral=True)
+                await interaction.response.send_message("等待其他人", ephemeral=True)
         else:
-            await interaction.response.send_message("你已經出過拳了",ephemeral=True)
+            await interaction.response.send_message("你已經出過拳了", ephemeral=True)
 
-    @discord.ui.button(label="join",style=discord.ButtonStyle.green)
-    async def join(self,interaction,button):
+    @discord.ui.button(label="join", style=discord.ButtonStyle.green)
+    async def join(self, interaction, button):
         if interaction.user not in self.joinuser:
             self.joinuser.append(str(interaction.user))
-            self.embed.description=f"{self.embed.description}\n{interaction.user}"
-            await interaction.response.edit_message(embed=self.embed,view=self)
+            self.embed.description = f"{self.embed.description}\n{interaction.user}"
+            await interaction.response.edit_message(embed=self.embed, view=self)
         else:
-            await interaction.response.send_message("你已經參加了",ephemeral=True)
-    
-            
+            await interaction.response.send_message("你已經參加了", ephemeral=True)
+
 
 # 投票介面
 class voteui(View):
@@ -322,51 +318,29 @@ class rolldice(View):
         i = random.randint(1, 6)
 
         # 圖片自己找的 可修改
-        if i == 1:
-            embed.set_thumbnail(
-                url="https://media.discordapp.net/attachments/774950219669307397/1069858458163228702/1.png?width=467&height=467"
-            )
-        if i == 2:
-            embed.set_thumbnail(
-                url="https://media.discordapp.net/attachments/774950219669307397/1069858458456838154/2.png?width=467&height=467"
-            )
-        if i == 3:
-            embed.set_thumbnail(
-                url="https://media.discordapp.net/attachments/774950219669307397/1069858458716876840/3.png?width=467&height=467"
-            )
-        if i == 4:
-            embed.set_thumbnail(
-                url="https://media.discordapp.net/attachments/774950219669307397/1069858458905628722/4.png?width=467&height=467"
-            )
-        if i == 5:
-            embed.set_thumbnail(
-                url="https://media.discordapp.net/attachments/774950219669307397/1069858459106934844/5.png?width=467&height=467"
-            )
-        if i == 6:
-            embed.set_thumbnail(
-                url="https://media.discordapp.net/attachments/774950219669307397/1069858459333439498/6.png?width=467&height=467"
-            )
+        embed.set_thumbnail(url=ConfigParser()["image"][f"dice_{i}_url"])
+
         await interaction.response.edit_message(embed=embed)
 
 
 # 定義個人 Client
 class MyClient(discord.Client):
-    def __init__(self,*args,**kwargs):
-        super().__init__(*args,**kwargs)
-    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     ##定時工作請假提醒
     @tasks.loop(hours=5)
-    async def checkleave(self): 
-        channellist=self.get_all_channels()
+    async def checkleave(self):
+        channellist = self.get_all_channels()
         for i in channellist:
-            if i.name == '出缺勤':
-                channel=i
-        today=datetime.datetime.now().strftime("%Y-%m-%d")
-        if(leavelist==[]):
+            if i.name == "出缺勤":
+                channel = i
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
+        if leavelist == []:
             return
         else:
             for i in leavelist:
-                if i['date'] == today:
+                if i["date"] == today:
                     await channel.send(f"請假通知\n 姓名:{i['user']} \n日期:{i['date']} \n原因:{i['reason']}\n\n")
 
 

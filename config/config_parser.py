@@ -3,7 +3,7 @@ import importlib.resources as pkg_resources
 from typing import Any
 
 
-class MateConfigParser(type):
+class __MetaConfigParser(type):
     def __init__(self, *args: Any, **kwds: Any):
         self.config_parser = configparser.ConfigParser()
         with pkg_resources.path(__package__, "config.ini") as path:
@@ -13,5 +13,5 @@ class MateConfigParser(type):
         return self.config_parser
 
 
-class ConfigParser(metaclass=MateConfigParser):
+class ConfigParser(metaclass=__MetaConfigParser):
     pass

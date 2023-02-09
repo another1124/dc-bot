@@ -1,5 +1,4 @@
 import datetime
-import json
 import random
 
 import discord
@@ -10,10 +9,6 @@ from config import ConfigParser
 
 embed = discord.Embed()
 leavelist = []  # 假單列表
-
-
-def get_leve_list():  # 回傳假單列表
-    return leavelist
 
 
 # 假單

@@ -1,8 +1,4 @@
-import configparser
 import datetime
-import importlib.resources as pkg_resources
-import json
-import pathlib
 import threading
 
 import discord
@@ -18,10 +14,7 @@ TOKEN = ConfigParser()["appData"]["TOKEN"]
 
 # 本來用來做錄音 但是沒有成功 現在沒有用
 re_list = []
-#
 
-# embed 物件初始化
-embed = discord.Embed()
 
 # 設定client intents
 intents = discord.Intents.default()

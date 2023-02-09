@@ -34,7 +34,9 @@ embed = discord.Embed()
 
 ## 設定client intents
 intents = discord.Intents.default()
-intents.message_content = True
+intents.message_content = True ## 機器人會收到訊息內容
+intents.members = True ## 機器人會收到成員訊息
+
 
 ## 初始化改寫過的client  Myclient 繼承 discord.Client   ( type(Myclient) = type(discord.Client) )
 client = Myview.MyClient(intents=intents)
@@ -118,6 +120,27 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
+
+    leavelist=Myview.get_leve_list()
+    today=datetime.datetime.now().strftime("%Y-%m-%d")
+    
+    if "@" in message.content: ### 只讓有@的訊息進入迴圈@
+        memberlist=[]
+        for i in client.guilds:
+            if int(i.id) == int(GUILD_ID):
+                memberlist=i.members
+
+        for i in memberlist:
+            if (f"@{i.id}") in str(message.content):### 如果訊息內有 @人名
+                channellist=client.get_all_channels()
+                for j in channellist: #找頻道
+                    if j.name=='出缺勤' :
+                        channel=j
+                        break
+                for j in leavelist:  #確認是否有請假
+                    if ( j['user'] == str(i) ) & ( j['date'] == today ):
+                        await channel.send(f"{i.name} 今天已經請假了")
+                        return
     pass
 #########
 

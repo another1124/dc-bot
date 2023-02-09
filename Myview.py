@@ -158,18 +158,19 @@ class MyClient(discord.Client):
         super().__init__(*args,**kwargs)
     
     ##定時工作請假提醒
-    @tasks.loop(hours=19)
+    @tasks.loop(hours=5)
     async def checkleave(self): 
         channellist=self.get_all_channels()
-        print(channellist)
-        channel=self.get_channel(1072052767587303494)
+        for i in channellist:
+            if i.name == '出缺勤':
+                channel=i
         today=datetime.datetime.now().strftime("%Y-%m-%d")
         if(leavelist==[]):
             return
         else:
             for i in leavelist:
                 if i['date'] == today:
-                    await channel.send(f"請假告示\n 姓名:{i['user']} \n日期:{i['date']} \n原因:{i['reason']}\n\n")
+                    await channel.send(f"請假通知\n 姓名:{i['user']} \n日期:{i['date']} \n原因:{i['reason']}\n\n")
 
 
         

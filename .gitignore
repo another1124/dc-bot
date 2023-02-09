@@ -2,7 +2,6 @@ venv
 config/config.ini
 .backup/
 .conda/
-.vscode/
 experiments/
 playground.ipynb
 

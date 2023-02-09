@@ -9,9 +9,10 @@ from discord.ui import Button, Modal, Select, TextInput, View
 embed = discord.Embed()
 leavelist = []  # 假單列表
 
-
 def get_leve_list():  # 回傳假單列表
     return leavelist
+
+
 
 
 # 假單
@@ -99,6 +100,112 @@ class menu(View):
     async def vote(self, interaction, button):
         await interaction.response.send_modal(votemodal())
 
+    # 猜拳
+    @discord.ui.button(label="mora", style=discord.ButtonStyle.red)
+    async def mora(self, interaction, button):
+        embed=discord.Embed(title="猜拳",description="參加人員:")
+        v=joinmora(embed=embed)
+        await interaction.response.send_message(view=v,embed=embed)
+    
+    #假單
+    @discord.ui.button(label="leave form", style=discord.ButtonStyle.red)
+    async def leave(self, interaction, button):
+        await interaction.response.send_modal(leavemodal())
+
+    #查詢請假人員
+    @discord.ui.button(label="check leave", style=discord.ButtonStyle.red)
+    async def checkleave(self, interaction, button):
+        count=0
+        today=datetime.datetime.now().strftime("%Y-%m-%d")
+        for i in leavelist:
+            if i["date"] == today:
+                count+=1
+                await interaction.response.send_message(f"姓名:{i['user']} \n日期:{i['date']} \n原因:{i['reason']}\n\n",ephemeral=True)
+        if count==0:
+            await interaction.response.send_message("今天沒有人請假",ephemeral=True)
+
+
+# 猜拳
+class joinmora(View):
+    def __init__(self,embed):
+        super().__init__()
+        self.embed=embed
+        self.moralist=[]  # 猜拳列表
+        self.joinuser=[]  # 參加人員列表
+        self.submitlist=[]  # 已經出拳的人員列表
+    def gameset(self):
+            out=""
+            for i in range(len(self.moralist)):
+                out+=f"{self.moralist[i]['user']}:{self.moralist[i]['value']}\n"
+                
+            self.joinuser.clear()
+            self.submitlist.clear()
+            self.moralist.clear()
+            return out
+
+    @discord.ui.button(label="剪刀",style=discord.ButtonStyle.red)
+    async def scissors(self,interaction,button):
+        if str(interaction.user) not in self.joinuser:
+            await interaction.response.send_message("你沒有參加遊戲",ephemeral=True)
+            return
+        if str(interaction.user) not in self.submitlist:
+            self.submitlist.append(str(interaction.user))
+            self.moralist.append({
+                    "user":str(interaction.user),
+                    "value":"剪刀"
+                })
+            if len(self.submitlist)==len(self.joinuser):
+                await interaction.response.send_message("遊戲結束\n"+self.gameset())
+            else:
+                await interaction.response.send_message("等待其他人",ephemeral=True)
+        else:
+            await interaction.response.send_message("你已經出過拳了",ephemeral=True)
+    @discord.ui.button(label="石頭",style=discord.ButtonStyle.red)
+    async def rock(self,interaction,button):
+        if str(interaction.user) not in self.joinuser:
+            await interaction.response.send_message("你沒有參加遊戲",ephemeral=True)
+            return
+        if str(interaction.user) not in self.submitlist:
+            self.submitlist.append(str(interaction.user))
+            self.moralist.append({
+                    "user":str(interaction.user),
+                    "value":"石頭"
+                })
+
+            if len(self.submitlist)==len(self.joinuser):
+                await interaction.response.send_message("遊戲結束\n"+self.gameset())
+            else:
+                await interaction.response.send_message("等待其他人",ephemeral=True)
+        else:
+            await interaction.response.send_message("你已經出過拳了",ephemeral=True)
+    @discord.ui.button(label="布",style=discord.ButtonStyle.red)
+    async def paper(self,interaction,button):
+        if str(interaction.user) not in self.joinuser:
+            await interaction.response.send_message("你沒有參加遊戲",ephemeral=True)
+            return
+        if str(interaction.user) not in self.submitlist:
+            self.submitlist.append(str(interaction.user))
+            self.moralist.append({
+                    "user":str(interaction.user),
+                    "value":"布"
+                })
+            if len(self.submitlist)==len(self.joinuser):
+                await interaction.response.send_message("遊戲結束\n"+self.gameset())
+            else:
+                await interaction.response.send_message("等待其他人",ephemeral=True)
+        else:
+            await interaction.response.send_message("你已經出過拳了",ephemeral=True)
+
+    @discord.ui.button(label="join",style=discord.ButtonStyle.green)
+    async def join(self,interaction,button):
+        if interaction.user not in self.joinuser:
+            self.joinuser.append(str(interaction.user))
+            self.embed.description=f"{self.embed.description}\n{interaction.user}"
+            await interaction.response.edit_message(embed=self.embed,view=self)
+        else:
+            await interaction.response.send_message("你已經參加了",ephemeral=True)
+    
+            
 
 # 投票介面
 class voteui(View):

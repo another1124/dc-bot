@@ -59,7 +59,7 @@ async def ping(interaction):
 async def hello(interaction):
     await interaction.response.send_message("hello")
 
-
+"""
 # 執行請假流程 輸入/leave 回傳請假表單
 @tree.command(name="leave", description="call leave form", guild=discord.Object(id=GUILD_ID))
 async def askleave(interaction):
@@ -74,7 +74,7 @@ async def checkleave(interaction):
     for i in leavelist:
         if i["date"] == today:
             await interaction.response.send_message(f"姓名:{i['user']} \n日期:{i['date']} \n原因:{i['reason']}\n\n")
-
+"""
 
 # 呼叫功能選單 /menu 回傳功能選單
 @tree.command(name="menu", description="call menu", guild=discord.Object(id=GUILD_ID))

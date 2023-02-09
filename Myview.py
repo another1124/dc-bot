@@ -78,38 +78,38 @@ class menu(View):
         self.value = None
 
     # 擲骰子
-    @discord.ui.button(label="roll dice", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="roll dice", style=discord.ButtonStyle.blurple)
     async def roll(self, interaction, button):
         v = rolldice()
 
         await interaction.response.send_message(view=v)
 
     # 錄音(沒有用)
-    @discord.ui.button(label="record", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="record", style=discord.ButtonStyle.blurple)
     async def record(self, interaction, button):
         v = record()
 
         await interaction.response.send_message(view=v)
 
     # 創立投票
-    @discord.ui.button(label="create vote", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="create vote", style=discord.ButtonStyle.blurple)
     async def vote(self, interaction, button):
         await interaction.response.send_modal(votemodal())
 
     # 猜拳
-    @discord.ui.button(label="mora", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="mora", style=discord.ButtonStyle.blurple)
     async def mora(self, interaction, button):
         embed = discord.Embed(title="猜拳", description="參加人員:")
         v = joinmora(embed=embed)
         await interaction.response.send_message(view=v, embed=embed)
 
     # 假單
-    @discord.ui.button(label="leave form", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="leave form", style=discord.ButtonStyle.blurple)
     async def leave(self, interaction, button):
         await interaction.response.send_modal(leavemodal())
 
     # 查詢請假人員
-    @discord.ui.button(label="check leave", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="check leave", style=discord.ButtonStyle.blurple)
     async def checkleave(self, interaction, button):
         count = 0
         today = datetime.datetime.now().strftime("%Y-%m-%d")

@@ -1,2 +1,4 @@
 discord.py
+bs4
 gunicorn
+requests

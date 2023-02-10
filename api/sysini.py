@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
-
+leavelist=[]
 # 定義個人 Client
 class MyClient(discord.Client):
     def __init__(self, *args, **kwargs):

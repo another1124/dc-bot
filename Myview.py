@@ -5,14 +5,13 @@ import discord
 from discord.ext import commands, tasks
 from discord.ui import Button, Modal, Select, TextInput, View
 
-import book1
+import book2
 import constellation1
 import movie1
 from api import sysini
 from config import ConfigParser
 
 embed = discord.Embed()
-sysini.leavelist = []  # 假單列表
 
 
 # 假單
@@ -125,10 +124,12 @@ class menu(View):
                 )
         if count == 0:
             await interaction.response.send_message("今天沒有人請假", ephemeral=True)
+    # 書籍推薦
     @discord.ui.button(label="book recommand",style=discord.ButtonStyle.blurple)
     async def book(self,interaction,button):
-        await interaction.response.send_modal(bookmodal())
+        await interaction.response.send_modal(bookmodal(self))
     
+    # 電影
     @discord.ui.button(label="new movie",style=discord.ButtonStyle.blurple)
     async def movie(self,interaction,button):
         list=movie1.get_result()
@@ -139,14 +140,44 @@ class menu(View):
             embed.set_thumbnail(url=i['url'])
             
             await ch.send(embed=embed)
+    # 星座
+    @discord.ui.button(label="fortune-teller",style=discord.ButtonStyle.blurple)
+    async def luck(self,interaction,button):
+        v=luckview()
+        await interaction.response.send_message(view=v,ephemeral=True)
 
 
+## 星座
+class luckview(View):
+    def __init__(self):
+        super().__init__()
+        self.s=None
+    list1 = ["牡羊座","金牛座","雙子座","巨蟹座",
+            "獅子座","處女座","天秤座","天蠍座",
+            "射手座","摩羯座","水瓶座","雙魚座"]
+    @discord.ui.select(
+        placeholder="chose constellation",
+        options=[ discord.SelectOption(value=i,label=i) for i in list1]
+    )
+    async def callback(self,interection,select):
+        self.s=str(select.values[0])
+        select.placeholder=str(select.values[0])
+        await interection.response.edit_message(view=self)
+
+    @discord.ui.button(label="submit",style=discord.ButtonStyle.green)
+    async def submit(self,interction,button):
+        out=constellation1.destiny(self.s)
+        await interction.response.send_message(out, ephemeral=True)
 #查詢推薦書籍
 
 
 class bookmodal(Modal,title="書籍推薦"):
+    def __init__(self,view):
+        super().__init__()
+        self.v=view
+
     cls = TextInput(
-        label="class",
+        label="key",
         style=discord.TextStyle.short,
         placeholder="class",
         default="None",
@@ -155,11 +186,15 @@ class bookmodal(Modal,title="書籍推薦"):
         row=0,
     )
     async def on_submit(self, interaction: discord.Interaction):
-        list=movie1.get_result()
+        list=book2.query(str(self.cls) )
         id=interaction.channel_id
         ch=sysini.client.get_channel(id)
+        await interaction.response.edit_message(view=self.v)
         for i in list:
-            await ch.send(i["name"])
+            embed.set_thumbnail(url=i["url"])
+            embed.title=i['name']
+            embed.description=i['price']
+            await ch.send(embed=embed)
 # 猜拳
 class joinmora(View):
     def __init__(self, embed):

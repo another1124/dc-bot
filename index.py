@@ -120,7 +120,6 @@ async def on_message(message):
     if message.author == sysini.client.user:
         return
 
-    leavelist = Myview.get_leve_list()
     today = datetime.datetime.now().strftime("%Y-%m-%d")
 
     if "@" in message.content:  ### 只讓有@的訊息進入迴圈@
@@ -136,7 +135,7 @@ async def on_message(message):
                     if j.name == "出缺勤":
                         channel = j
                         break
-                for j in leavelist:  # 確認是否有請假
+                for j in sysini.leavelist:  # 確認是否有請假
                     if (j["user"] == str(i)) & (j["date"] == today):
                         await channel.send(f"{i.name} 今天已經請假了")
                         return

@@ -19,6 +19,6 @@ def destiny(astros):
     print("幸運顏色：" + lucky_color)
     
     div = soup.find("div",class_ = "TODAY_CONTENT")
-    print(div.text)
+    return str(div.text)
     
 #destiny("牡羊座")

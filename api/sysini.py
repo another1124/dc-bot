@@ -5,7 +5,13 @@ import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
-leavelist=[]
+from api import database
+
+with database.dbopen("./database.db") as c:
+    c.execute("CREATE TABLE IF NOT EXISTS leave(id auto_increment, name varchar(20), year int, month int ,day int ,reason varchar(200) ) ")
+
+
+
 # 定義個人 Client
 class MyClient(discord.Client):
     def __init__(self, *args, **kwargs):
@@ -14,18 +20,17 @@ class MyClient(discord.Client):
     ##定時工作請假提醒
     @tasks.loop(hours=5)
     async def checkleave(self):
-        print(leavelist)
+        today = datetime.datetime.now()
+        with database.dbopen("./database.db") as c:  # 確認是否有請假
+                c.execute(f"select * from leave where  year={today.year} and month={today.month} and day={today.day}")
+                out=c.fetchall()
+
         channellist = self.get_all_channels()
         for i in channellist:
             if i.name == "出缺勤":
                 channel = i
-        today = datetime.datetime.now().strftime("%Y-%m-%d")
-        if leavelist == []:
-            return
-        else:
-            for i in leavelist:
-                if i["date"] == today:
-                    await channel.send(f"請假通知\n 姓名:{i['user']} \n日期:{i['date']} \n原因:{i['reason']}\n\n")
+        for i in out:
+            await channel.send(f"請假通知\n 姓名:{i[1]} \n日期:{i[2]}-{i[3]}-{i[4]} \n原因:{i[5]}\n\n")
 
 # 設定client intents
 intents = discord.Intents.default()

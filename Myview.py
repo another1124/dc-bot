@@ -59,19 +59,11 @@ class leavemodal(Modal, title="leave form"):
     # 送出假單
     async def on_submit(self, interaction: discord.Interaction):
         try:
-            sysini.leavelist.append(
-                {
-                    "user": str(interaction.user),
-                    "reason": str(self.reason),
-                    "date": datetime.datetime.strptime(
-                        str(self.year) + str(self.month) + str(self.day), "%Y%m%d"
-                    ).strftime("%Y-%m-%d"),
-                }
-            )
-            database.databasecommand(f"insert into leave values ({interaction.user.name} , {self.year},{self.month},{self.day}); ")
-            print(sysini.leavelist)
+            with database.dbopen("./database.db") as c:
+                c.execute(f"insert into leave(name , year,month,day,reason) values (\"{interaction.user}\",{self.year},{self.month},{self.day},\"{self.reason}\")")
+
             await interaction.response.send_message("已經送出假單了", ephemeral=True)
-        except ValueError:
+        except :
             await interaction.response.send_message("輸入格式錯誤", ephemeral=True)
 
 
@@ -85,13 +77,6 @@ class menu(View):
     @discord.ui.button(label="roll dice", style=discord.ButtonStyle.blurple)
     async def roll(self, interaction, button):
         v = rolldice()
-
-        await interaction.response.send_message(view=v)
-
-    # 錄音(沒有用)
-    @discord.ui.button(label="record", style=discord.ButtonStyle.blurple)
-    async def record(self, interaction, button):
-        v = record()
 
         await interaction.response.send_message(view=v)
 
@@ -116,15 +101,21 @@ class menu(View):
     @discord.ui.button(label="check leave", style=discord.ButtonStyle.blurple)
     async def checkleave(self, interaction, button):
         count = 0
-        today = datetime.datetime.now().strftime("%Y-%m-%d")
-        for i in sysini.leavelist:
-            if i["date"] == today:
-                count += 1
-                await interaction.response.send_message(
-                    f"姓名:{i['user']} \n日期:{i['date']} \n原因:{i['reason']}\n\n", ephemeral=True
-                )
-        if count == 0:
-            await interaction.response.send_message("今天沒有人請假", ephemeral=True)
+        now=datetime.datetime.now()
+        leavelist=[]
+        with database.dbopen("./database.db") as c:
+            c.execute(f"select * from leave where year={now.year} and month={now.month} and day={now.day}")
+            leavelist=c.fetchall()
+        id=interaction.channel_id
+        ch=sysini.client.get_channel(id)
+        for i in leavelist:
+             await ch.send(f"姓名:{i[1]} \n日期:{i[2]}-{i[3]}-{i[4]} \n原因:{i[5]}\n\n")
+        if len(leavelist)==0:
+            await interaction.response.send_message("今天沒有人請假")
+        else:
+            await interaction.response.send_message(f"共查詢到{len(leavelist)}筆資料")
+        return
+        
     # 書籍推薦
     @discord.ui.button(label="book recommand",style=discord.ButtonStyle.blurple)
     async def book(self,interaction,button):
@@ -391,20 +382,3 @@ class rolldice(View):
         await interaction.response.edit_message(embed=embed)
 
 
-
-
-# 錄音功能(暫時沒有用)
-class record(View):
-    def __init__(self):
-        super().__init__()
-        self.value = None
-
-    @discord.ui.button(label="start", style=discord.ButtonStyle.red)
-    async def start(self, interaction, button):
-        channel = interaction.channel
-        out = "channel is " + str(channel)
-        await interaction.response.send_message(out)
-
-    @discord.ui.button(label="stop", style=discord.ButtonStyle.red)
-    async def stop(self, interaction, button):
-        await interaction.response.edit_message(embed=self.value)

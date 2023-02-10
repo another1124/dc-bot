@@ -6,7 +6,7 @@ from discord import app_commands
 from discord.ext import commands
 
 import Myview
-from api import sysini
+from api import database, sysini
 from config import ConfigParser
 
 CLIENT_ID = ConfigParser()["appData"]["CLIENT_ID"]
@@ -58,22 +58,7 @@ async def book(interaction: discord.Interaction,cls: str ):
    # embed.set_thumbnail(url=)
 
 
-"""
-# 執行請假流程 輸入/leave 回傳請假表單
-@sysini.tree.command(name="leave", description="call leave form", guild=discord.Object(id=GUILD_ID))
-async def askleave(interaction):
-    await interaction.response.send_modal(Myview.leavemodal())
 
-
-# 查詢當日請假人員 輸入/checkleave 回傳當日請假人員
-@sysini.tree.command(name="checkleave", description="check leave form", guild=discord.Object(id=GUILD_ID))
-async def checkleave(interaction):
-    leavelist = Myview.get_leve_list()
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
-    for i in leavelist:
-        if i["date"] == today:
-            await interaction.response.send_message(f"姓名:{i['user']} \n日期:{i['date']} \n原因:{i['reason']}\n\n")
-"""
 
 
 # 呼叫功能選單 /menu 回傳功能選單
@@ -120,7 +105,7 @@ async def on_message(message):
     if message.author == sysini.client.user:
         return
 
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    today = datetime.datetime.now()
 
     if "@" in message.content:  ### 只讓有@的訊息進入迴圈@
         memberlist = []
@@ -135,8 +120,10 @@ async def on_message(message):
                     if j.name == "出缺勤":
                         channel = j
                         break
-                for j in sysini.leavelist:  # 確認是否有請假
-                    if (j["user"] == str(i)) & (j["date"] == today):
+                with database.dbopen("./database.db") as c:  # 確認是否有請假
+                    c.execute(f"select * from leave where name = {i.name} and year={today.year} and month={today.month} and day={today.day}")
+                    out=c.fetchall()
+                    if len(out) !=0:
                         await channel.send(f"{i.name} 今天已經請假了")
                         return
     pass

@@ -14,4 +14,9 @@ class __MetaConfigParser(type):
 
 
 class ConfigParser(metaclass=__MetaConfigParser):
+    """Use this class to get config data from config.ini
+
+    For example:
+        ConfigParser()["appData"]["TOKEN"]  # get token from config.ini
+    """
     pass

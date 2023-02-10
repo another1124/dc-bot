@@ -21,4 +21,4 @@ def destiny(astros):
     div = soup.find("div",class_ = "TODAY_CONTENT")
     print(div.text)
     
-destiny("牡羊座")
+#destiny("牡羊座")

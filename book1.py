@@ -1,8 +1,10 @@
-from selenium import webdriver
+import time
+
 from bs4 import BeautifulSoup
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-import time
+
 
 def query(keyword):
     chrome = webdriver.Chrome()
@@ -18,6 +20,7 @@ def query(keyword):
     
     divs = div_tr.find_all("div",class_ = "table-td")
     
+    rlist=[]
     for div in divs:
         img = div.find("img")
         
@@ -25,6 +28,5 @@ def query(keyword):
         book_url = img["src"]
         book_price = div.find_all("b")[-1].text + "元"
         
-        print(book_name,book_url,book_price)
-
-query("嬰兒")
+        rlist.append({"name":book_name,"url":book_url,"price":book_price})
+    return rlist

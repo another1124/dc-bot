@@ -5,10 +5,14 @@ import discord
 from discord.ext import commands, tasks
 from discord.ui import Button, Modal, Select, TextInput, View
 
+import book1
+import constellation1
+import movie1
+from api import sysini
 from config import ConfigParser
 
 embed = discord.Embed()
-leavelist = []  # 假單列表
+sysini.leavelist = []  # 假單列表
 
 
 # 假單
@@ -56,7 +60,7 @@ class leavemodal(Modal, title="leave form"):
     # 送出假單
     async def on_submit(self, interaction: discord.Interaction):
         try:
-            leavelist.append(
+            sysini.leavelist.append(
                 {
                     "user": str(interaction.user),
                     "reason": str(self.reason),
@@ -65,7 +69,7 @@ class leavemodal(Modal, title="leave form"):
                     ).strftime("%Y-%m-%d"),
                 }
             )
-            print(leavelist)
+            print(sysini.leavelist)
             await interaction.response.send_message("已經送出假單了", ephemeral=True)
         except:
             await interaction.response.send_message("輸入格式錯誤", ephemeral=True)
@@ -113,7 +117,7 @@ class menu(View):
     async def checkleave(self, interaction, button):
         count = 0
         today = datetime.datetime.now().strftime("%Y-%m-%d")
-        for i in leavelist:
+        for i in sysini.leavelist:
             if i["date"] == today:
                 count += 1
                 await interaction.response.send_message(
@@ -121,8 +125,41 @@ class menu(View):
                 )
         if count == 0:
             await interaction.response.send_message("今天沒有人請假", ephemeral=True)
+    @discord.ui.button(label="book recommand",style=discord.ButtonStyle.blurple)
+    async def book(self,interaction,button):
+        await interaction.response.send_modal(bookmodal())
+    
+    @discord.ui.button(label="new movie",style=discord.ButtonStyle.blurple)
+    async def movie(self,interaction,button):
+        list=movie1.get_result()
+        id=interaction.channel_id
+        ch=sysini.client.get_channel(id)
+        for i in list:
+            embed.title=str(i["name"])
+            embed.set_thumbnail(url=i['url'])
+            
+            await ch.send(embed=embed)
 
 
+#查詢推薦書籍
+
+
+class bookmodal(Modal,title="書籍推薦"):
+    cls = TextInput(
+        label="class",
+        style=discord.TextStyle.short,
+        placeholder="class",
+        default="None",
+        required=True,
+        max_length=20,
+        row=0,
+    )
+    async def on_submit(self, interaction: discord.Interaction):
+        list=movie1.get_result()
+        id=interaction.channel_id
+        ch=sysini.client.get_channel(id)
+        for i in list:
+            await ch.send(i["name"])
 # 猜拳
 class joinmora(View):
     def __init__(self, embed):
@@ -131,7 +168,7 @@ class joinmora(View):
         self.moralist = []  # 猜拳列表
         self.joinuser = []  # 參加人員列表
         self.submitlist = []  # 已經出拳的人員列表
-
+    
     def gameset(self):
         out = ""
         for i in range(len(self.moralist)):
@@ -318,25 +355,6 @@ class rolldice(View):
         await interaction.response.edit_message(embed=embed)
 
 
-# 定義個人 Client
-class MyClient(discord.Client):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    ##定時工作請假提醒
-    @tasks.loop(hours=5)
-    async def checkleave(self):
-        channellist = self.get_all_channels()
-        for i in channellist:
-            if i.name == "出缺勤":
-                channel = i
-        today = datetime.datetime.now().strftime("%Y-%m-%d")
-        if leavelist == []:
-            return
-        else:
-            for i in leavelist:
-                if i["date"] == today:
-                    await channel.send(f"請假通知\n 姓名:{i['user']} \n日期:{i['date']} \n原因:{i['reason']}\n\n")
 
 
 # 錄音功能(暫時沒有用)

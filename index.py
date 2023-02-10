@@ -153,11 +153,11 @@ def bot_run():
     sysini.bot.run(TOKEN)
 
 
-t1 = threading.Thread(target=client_run)  # client thread
+##t1 = threading.Thread(target=client_run)  # client thread
 #t2=threading.Thread(target=bot_run)    # bot thread
 
-t1.start()
+#t1.start()
 #t2.start()
-
-t1.join()
+client_run()
+#t1.join()
 #t2.join()

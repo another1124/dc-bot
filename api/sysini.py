@@ -14,6 +14,7 @@ class MyClient(discord.Client):
     ##定時工作請假提醒
     @tasks.loop(hours=5)
     async def checkleave(self):
+        print(leavelist)
         channellist = self.get_all_channels()
         for i in channellist:
             if i.name == "出缺勤":

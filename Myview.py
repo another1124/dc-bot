@@ -8,7 +8,7 @@ from discord.ui import Button, Modal, Select, TextInput, View
 import book2
 import constellation1
 import movie1
-from api import sysini
+from api import database, sysini
 from config import ConfigParser
 
 embed = discord.Embed()
@@ -68,9 +68,10 @@ class leavemodal(Modal, title="leave form"):
                     ).strftime("%Y-%m-%d"),
                 }
             )
+            database.databasecommand(f"insert into leave values ({interaction.user.name} , {self.year},{self.month},{self.day}); ")
             print(sysini.leavelist)
             await interaction.response.send_message("已經送出假單了", ephemeral=True)
-        except:
+        except ValueError:
             await interaction.response.send_message("輸入格式錯誤", ephemeral=True)
 
 
@@ -133,13 +134,13 @@ class menu(View):
     @discord.ui.button(label="new movie",style=discord.ButtonStyle.blurple)
     async def movie(self,interaction,button):
         list=movie1.get_result()
-        id=interaction.channel_id
-        ch=sysini.client.get_channel(id)
+        id=interaction.user.id
+        user=sysini.client.get_user(id)
         for i in list:
             embed.title=str(i["name"])
             embed.set_thumbnail(url=i['url'])
             
-            await ch.send(embed=embed)
+            await user.send(embed=embed)
     # 星座
     @discord.ui.button(label="fortune-teller",style=discord.ButtonStyle.blurple)
     async def luck(self,interaction,button):
@@ -187,14 +188,14 @@ class bookmodal(Modal,title="書籍推薦"):
     )
     async def on_submit(self, interaction: discord.Interaction):
         list=book2.query(str(self.cls) )
-        id=interaction.channel_id
-        ch=sysini.client.get_channel(id)
+        id=interaction.user.id
+        user=sysini.client.get_user(id)
         await interaction.response.edit_message(view=self.v)
         for i in list:
             embed.set_thumbnail(url=i["url"])
             embed.title=i['name']
             embed.description=i['price']
-            await ch.send(embed=embed)
+            await user.send(embed=embed)
 # 猜拳
 class joinmora(View):
     def __init__(self, embed):
@@ -289,7 +290,7 @@ class voteui(View):
             self.l1 + "  " + str(self.c1) + "\n" + self.l2 + "  " + str(self.c2) + "\n" + self.l3 + "  " + str(self.c3)
         )
 
-    @discord.ui.button(label="choice1", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="option A", style=discord.ButtonStyle.green)
     async def choice1(self, interaction, button):
         if interaction.user.id not in self.votelist:
             self.votelist.append(interaction.user.id)
@@ -299,7 +300,7 @@ class voteui(View):
         else:
             await interaction.response.send_message("你已經投過票了", ephemeral=True)
 
-    @discord.ui.button(label="choice2", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="option B", style=discord.ButtonStyle.green)
     async def choice2(self, interaction, button):
         if interaction.user.id not in self.votelist:
             self.votelist.append(interaction.user.id)
@@ -309,7 +310,7 @@ class voteui(View):
         else:
             await interaction.response.send_message("你已經投過票了", ephemeral=True)
 
-    @discord.ui.button(label="choice3", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="option C", style=discord.ButtonStyle.green)
     async def choice3(self, interaction, button):
         if interaction.user.id not in self.votelist:
             self.votelist.append(interaction.user.id)
@@ -332,27 +333,27 @@ class votemodal(Modal, title="vote setting"):
         row=0,
     )
     s1 = TextInput(
-        label="choice 1",
+        label="option A",
         style=discord.TextStyle.short,
-        placeholder="choice 1",
+        placeholder="option A",
         default="None",
         required=True,
         max_length=50,
         row=1,
     )
     s2 = TextInput(
-        label="choice 2",
+        label="option B",
         style=discord.TextStyle.short,
-        placeholder="choice 2",
+        placeholder="option B",
         default="None",
         required=True,
         max_length=50,
         row=2,
     )
     s3 = TextInput(
-        label="choice 3",
+        label="option C",
         style=discord.TextStyle.short,
-        placeholder="choice 3",
+        placeholder="option C",
         default="None",
         required=True,
         max_length=50,
@@ -360,9 +361,9 @@ class votemodal(Modal, title="vote setting"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
-        l1 = str(self.s1.label) + ":" + str(self.s1)
-        l2 = str(self.s2.label) + ":" + str(self.s2)
-        l3 = str(self.s3.label) + ":" + str(self.s3)
+        l1 = str(self.s1.label) + "：" + str(self.s1)
+        l2 = str(self.s2.label) + "：" + str(self.s2)
+        l3 = str(self.s3.label) + "：" + str(self.s3)
 
         embed = discord.Embed(
             title=str(self.t),

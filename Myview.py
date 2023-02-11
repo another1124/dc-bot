@@ -15,14 +15,15 @@ from config import ConfigParser
 
 embed = discord.Embed()
 ## 開會排程
-class scheview(Modal,title="calandar"):
-    def __init__(self): 
+class scheview(Modal, title="calandar"):
+    def __init__(self):
         super().__init__()
-        self.startmonth=1
-        self.endmonth=1
-        self.startday=1
-        self.endday=1
-    smonth=TextInput(
+        self.startmonth = 1
+        self.endmonth = 1
+        self.startday = 1
+        self.endday = 1
+
+    smonth = TextInput(
         label="start month",
         style=discord.TextStyle.short,
         placeholder="1",
@@ -31,7 +32,7 @@ class scheview(Modal,title="calandar"):
         max_length=2,
         row=0,
     )
-    sday=TextInput(
+    sday = TextInput(
         label="start day",
         style=discord.TextStyle.short,
         placeholder="1",
@@ -40,7 +41,7 @@ class scheview(Modal,title="calandar"):
         max_length=2,
         row=1,
     )
-    emonth=TextInput(
+    emonth = TextInput(
         label="end month",
         style=discord.TextStyle.short,
         placeholder="1",
@@ -49,7 +50,7 @@ class scheview(Modal,title="calandar"):
         max_length=2,
         row=2,
     )
-    eday=TextInput(
+    eday = TextInput(
         label="end day",
         style=discord.TextStyle.short,
         placeholder="1",
@@ -58,7 +59,7 @@ class scheview(Modal,title="calandar"):
         max_length=2,
         row=3,
     )
-    people=TextInput(
+    people = TextInput(
         label="people",
         style=discord.TextStyle.long,
         placeholder="people",
@@ -67,14 +68,18 @@ class scheview(Modal,title="calandar"):
         max_length=30,
         row=4,
     )
-    async def on_submit(self, interaction: discord.Interaction):
 
-        result=schedule_meeting_time(f"2020-{str(self.smonth)}-{str(self.sday)}",f"2020-{str(self.emonth)}-{str(self.eday)}",["Michael"])
-        out=""
+    async def on_submit(self, interaction: discord.Interaction):
+        start_date = str(datetime.datetime.strptime(f"2020-{str(self.smonth)}-{str(self.sday)}", "%Y-%m-%d").date())
+        end_date = str(datetime.datetime.strptime(f"2020-{str(self.emonth)}-{str(self.eday)}", "%Y-%m-%d").date())
+        members = ["Michael"]
+        result = schedule_meeting_time(start_date, end_date, members)
+        out = ""
         for i in result:
-            out+=(str(i)+'\n')
-        await interaction.response.send_message(out,ephemeral=True)
-    
+            out += str(i) + "\n"
+        await interaction.response.send_message(out, ephemeral=True)
+
+
 # 假單
 class leavemodal(Modal, title="leave form"):
     def __init__(self):
@@ -121,10 +126,12 @@ class leavemodal(Modal, title="leave form"):
     async def on_submit(self, interaction: discord.Interaction):
         try:
             with database.dbopen("./database.db") as c:
-                c.execute(f"insert into leave(name , year,month,day,reason) values (\"{interaction.user}\",{self.year},{self.month},{self.day},\"{self.reason}\")")
+                c.execute(
+                    f'insert into leave(name , year,month,day,reason) values ("{interaction.user}",{self.year},{self.month},{self.day},"{self.reason}")'
+                )
 
             await interaction.response.send_message("已經送出假單了", ephemeral=True)
-        except :
+        except:
             await interaction.response.send_message("輸入格式錯誤", ephemeral=True)
 
 
@@ -162,42 +169,44 @@ class menu(View):
     @discord.ui.button(label="check leave", style=discord.ButtonStyle.blurple)
     async def checkleave(self, interaction, button):
         count = 0
-        now=datetime.datetime.now()
-        leavelist=[]
+        now = datetime.datetime.now()
+        leavelist = []
         with database.dbopen("./database.db") as c:
             c.execute(f"select * from leave where year={now.year} and month={now.month} and day={now.day}")
-            leavelist=c.fetchall()
-        id=interaction.channel_id
-        ch=sysini.client.get_channel(id)
+            leavelist = c.fetchall()
+        id = interaction.channel_id
+        ch = sysini.client.get_channel(id)
         for i in leavelist:
-             await ch.send(f"姓名:{i[1]} \n日期:{i[2]}-{i[3]}-{i[4]} \n原因:{i[5]}\n\n")
-        if len(leavelist)==0:
+            await ch.send(f"姓名:{i[1]} \n日期:{i[2]}-{i[3]}-{i[4]} \n原因:{i[5]}\n\n")
+        if len(leavelist) == 0:
             await interaction.response.send_message("今天沒有人請假")
         else:
             await interaction.response.send_message(f"共查詢到{len(leavelist)}筆資料")
         return
-        
+
     # 書籍推薦
-    @discord.ui.button(label="book recommand",style=discord.ButtonStyle.blurple)
-    async def book(self,interaction,button):
+    @discord.ui.button(label="book recommand", style=discord.ButtonStyle.blurple)
+    async def book(self, interaction, button):
         await interaction.response.send_modal(bookmodal(self))
-    
+
     # 電影
-    @discord.ui.button(label="new movie",style=discord.ButtonStyle.blurple)
-    async def movie(self,interaction,button):
-        list=movie1.get_result()
-        id=interaction.user.id
-        user=sysini.client.get_user(id)
+    @discord.ui.button(label="new movie", style=discord.ButtonStyle.blurple)
+    async def movie(self, interaction, button):
+        list = movie1.get_result()
+        id = interaction.user.id
+        user = sysini.client.get_user(id)
         for i in list:
-            embed.title=str(i["name"])
-            embed.set_thumbnail(url=i['url'])
-            
+            embed.title = str(i["name"])
+            embed.set_thumbnail(url=i["url"])
+
             await user.send(embed=embed)
+
     # 星座
-    @discord.ui.button(label="fortune-teller",style=discord.ButtonStyle.blurple)
-    async def luck(self,interaction,button):
-        v=luckview()
-        await interaction.response.send_message(view=v,ephemeral=True)
+    @discord.ui.button(label="fortune-teller", style=discord.ButtonStyle.blurple)
+    async def luck(self, interaction, button):
+        v = luckview()
+        await interaction.response.send_message(view=v, ephemeral=True)
+
     # 股票
     @discord.ui.button(label="check stock",style=discord.ButtonStyle.blurple)
     async def ch_stock(self,interaction,butoon):
@@ -214,41 +223,41 @@ class menu(View):
         await interaction.response.send_message(out,ephemeral=True)
 
     # 開會
-    @discord.ui.button(label="calendar",style=discord.ButtonStyle.blurple)
-    async def calendar(self,intercation,button):
-        v=scheview()
+    @discord.ui.button(label="calendar", style=discord.ButtonStyle.blurple)
+    async def calendar(self, intercation, button):
+        v = scheview()
         await intercation.response.send_modal(v)
 
-    
 
 ## 星座
 class luckview(View):
     def __init__(self):
         super().__init__()
-        self.s=None
-    list1 = ["牡羊座","金牛座","雙子座","巨蟹座",
-            "獅子座","處女座","天秤座","天蠍座",
-            "射手座","摩羯座","水瓶座","雙魚座"]
+        self.s = None
+
+    list1 = ["牡羊座", "金牛座", "雙子座", "巨蟹座", "獅子座", "處女座", "天秤座", "天蠍座", "射手座", "摩羯座", "水瓶座", "雙魚座"]
+
     @discord.ui.select(
-        placeholder="chose constellation",
-        options=[ discord.SelectOption(value=i,label=i) for i in list1]
+        placeholder="chose constellation", options=[discord.SelectOption(value=i, label=i) for i in list1]
     )
-    async def callback(self,interection,select):
-        self.s=str(select.values[0])
-        select.placeholder=str(select.values[0])
+    async def callback(self, interection, select):
+        self.s = str(select.values[0])
+        select.placeholder = str(select.values[0])
         await interection.response.edit_message(view=self)
 
-    @discord.ui.button(label="submit",style=discord.ButtonStyle.green)
-    async def submit(self,interction,button):
-        out=constellation1.destiny(self.s)
+    @discord.ui.button(label="submit", style=discord.ButtonStyle.green)
+    async def submit(self, interction, button):
+        out = constellation1.destiny(self.s)
         await interction.response.send_message(out, ephemeral=True)
-#查詢推薦書籍
 
 
-class bookmodal(Modal,title="書籍推薦"):
-    def __init__(self,view):
+# 查詢推薦書籍
+
+
+class bookmodal(Modal, title="書籍推薦"):
+    def __init__(self, view):
         super().__init__()
-        self.v=view
+        self.v = view
 
     cls = TextInput(
         label="key",
@@ -259,16 +268,19 @@ class bookmodal(Modal,title="書籍推薦"):
         max_length=20,
         row=0,
     )
+
     async def on_submit(self, interaction: discord.Interaction):
-        list=book2.query(str(self.cls) )
-        id=interaction.user.id
-        user=sysini.client.get_user(id)
+        list = book2.query(str(self.cls))
+        id = interaction.user.id
+        user = sysini.client.get_user(id)
         await interaction.response.edit_message(view=self.v)
         for i in list:
             embed.set_thumbnail(url=i["url"])
-            embed.title=i['name']
-            embed.description=i['price']
+            embed.title = i["name"]
+            embed.description = i["price"]
             await user.send(embed=embed)
+
+
 # 猜拳
 class joinmora(View):
     def __init__(self, embed):
@@ -277,7 +289,7 @@ class joinmora(View):
         self.moralist = []  # 猜拳列表
         self.joinuser = []  # 參加人員列表
         self.submitlist = []  # 已經出拳的人員列表
-    
+
     def gameset(self):
         out = ""
         for i in range(len(self.moralist)):
@@ -462,5 +474,3 @@ class rolldice(View):
         embed.set_thumbnail(url=ConfigParser()["image"][f"dice_{i}_url"])
 
         await interaction.response.edit_message(embed=embed)
-
-

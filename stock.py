@@ -1,7 +1,10 @@
+import re
+
 import pandas as pd
 import requests
+import tabulate
 from bs4 import BeautifulSoup
-import re
+
 
 def query(company):
     url = f"https://tw.quote.finance.yahoo.net/quote/q?type=ta&perd=d&mkt=10&sym={company}&v=1&callback=jQuery111302872649618000682_1649814120914&_=1649814120915"
@@ -15,15 +18,16 @@ def query(company):
     yday = float(re.search(':.*',[l for l in res.text.split('{') if len(l)>=60][-2].split(',')[4]).group()[1:])
     
     df = pd.DataFrame({
-        'open':float(re.search(':.*',current[1]).group()[1:]),
-        'high':float(re.search(':.*',current[2]).group()[1:]),
-        'low':float(re.search(':.*',current[3]).group()[1:]),
-        'close':float(re.search(':.*',current[4]).group()[1:]),
-        'volume':float(re.search(':.*',current[5].replace('}]','')).group()[1:]),
-        'pct':round((float(re.search(':.*',current[4]).group()[1:])/yday-1)*100,2)
+        'open':[float(re.search(':.*',current[1]).group()[1:])],
+        'high':[float(re.search(':.*',current[2]).group()[1:])],
+        'low':[float(re.search(':.*',current[3]).group()[1:])],
+        'close':[float(re.search(':.*',current[4]).group()[1:])],
+        'volume':[float(re.search(':.*',current[5].replace('}]','')).group()[1:])],
+        'pct':[round((float(re.search(':.*',current[4]).group()[1:])/yday-1)*100,2)]
     },index=[company])
     
-    print(df)
+  
+    return(tabulate.tabulate(df,headers="keys",tablefmt="psql"))
     print("-----------------------------------------------")
 
-query("2330")
+#query("2330")

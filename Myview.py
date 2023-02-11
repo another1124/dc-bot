@@ -8,6 +8,7 @@ from discord.ui import Button, Modal, Select, TextInput, View
 import book2
 import constellation1
 import movie1
+import stock
 from api import calendar, database, sysini
 from api.calendar import schedule_meeting_time
 from config import ConfigParser
@@ -198,7 +199,19 @@ class menu(View):
         v=luckview()
         await interaction.response.send_message(view=v,ephemeral=True)
     # 股票
-   # @discord
+    @discord.ui.button(label="check stock",style=discord.ButtonStyle.blurple)
+    async def ch_stock(self,interaction,butoon):
+        with database.dbopen("./database.db") as c:
+            c.execute("select * from stock")
+            result=c.fetchall()
+        out=""
+        for i in result:
+            print(i)
+            out+=str(stock.query(str(i[1])))+'\n'
+        embed.title="stock"
+        embed.description=out
+        print(out)
+        await interaction.response.send_message(out,ephemeral=True)
 
     # 開會
     @discord.ui.button(label="calendar",style=discord.ButtonStyle.blurple)

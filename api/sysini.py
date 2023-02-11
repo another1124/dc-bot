@@ -9,7 +9,7 @@ from api import database
 
 with database.dbopen("./database.db") as c:
     c.execute("CREATE TABLE IF NOT EXISTS leave(id auto_increment, name varchar(20), year int, month int ,day int ,reason varchar(200) ) ")
-
+    c.execute("CREATE TABLE IF NOT EXISTS stock(id auto_increment, company int ) ")
 
 
 # 定義個人 Client

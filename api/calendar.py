@@ -54,6 +54,8 @@ def schedule_meeting_time(start_date: str, end_date: str, members: List[str]) ->
         List[str]: a list of free meeting time, format: "YYYY-MM-DD HH:MM:SS"
     """
     with dbopen("calendar.db") as c:
+        c.execute("SELECT * from calendar")
+        print(c.fetchall())
         c.execute(
             "SELECT date, hour FROM calendar WHERE member IN ({}) AND date BETWEEN ? AND ?".format(
                 ",".join("?" * len(members))

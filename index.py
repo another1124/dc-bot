@@ -42,6 +42,18 @@ async def ping(interaction):
     
     await interaction.response.send_message("Pong")
 
+@sysini.tree.command(name='instock',description="insert stock company",guild=discord.Object(id=GUILD_ID))
+async def stock(interaction: discord.Interaction,company: int):
+    try:
+        with database.dbopen("./database.db") as c:
+            c.execute(f"insert into stock(company) values( {company} ) ")
+        
+        await interaction.response.send_message("存入成功",ephemeral=True)
+    except:
+        await interaction.response.send_message("格式錯誤",ephemeral=True)
+    
+    
+
 
 # 測試用 輸入/hello 回復 hello
 @sysini.tree.command(name="hello", description="Replies with hello", guild=discord.Object(id=GUILD_ID))

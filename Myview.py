@@ -8,12 +8,72 @@ from discord.ui import Button, Modal, Select, TextInput, View
 import book2
 import constellation1
 import movie1
-from api import database, sysini
+from api import calendar, database, sysini
+from api.calendar import schedule_meeting_time
 from config import ConfigParser
 
 embed = discord.Embed()
+## 開會排程
+class scheview(Modal,title="calandar"):
+    def __init__(self): 
+        super().__init__()
+        self.startmonth=1
+        self.endmonth=1
+        self.startday=1
+        self.endday=1
+    smonth=TextInput(
+        label="start month",
+        style=discord.TextStyle.short,
+        placeholder="1",
+        default="1",
+        required=True,
+        max_length=2,
+        row=0,
+    )
+    sday=TextInput(
+        label="start day",
+        style=discord.TextStyle.short,
+        placeholder="1",
+        default="1",
+        required=True,
+        max_length=2,
+        row=1,
+    )
+    emonth=TextInput(
+        label="end month",
+        style=discord.TextStyle.short,
+        placeholder="1",
+        default="1",
+        required=True,
+        max_length=2,
+        row=2,
+    )
+    eday=TextInput(
+        label="end day",
+        style=discord.TextStyle.short,
+        placeholder="1",
+        default="1",
+        required=True,
+        max_length=2,
+        row=3,
+    )
+    people=TextInput(
+        label="people",
+        style=discord.TextStyle.long,
+        placeholder="people",
+        default="None",
+        required=True,
+        max_length=30,
+        row=4,
+    )
+    async def on_submit(self, interaction: discord.Interaction):
 
-
+        result=schedule_meeting_time(f"2020-{str(self.smonth)}-{str(self.sday)}",f"2020-{str(self.emonth)}-{str(self.eday)}",["Michael"])
+        out=""
+        for i in result:
+            out+=(str(i)+'\n')
+        await interaction.response.send_message(out,ephemeral=True)
+    
 # 假單
 class leavemodal(Modal, title="leave form"):
     def __init__(self):
@@ -137,7 +197,16 @@ class menu(View):
     async def luck(self,interaction,button):
         v=luckview()
         await interaction.response.send_message(view=v,ephemeral=True)
+    # 股票
+   # @discord
 
+    # 開會
+    @discord.ui.button(label="calendar",style=discord.ButtonStyle.blurple)
+    async def calendar(self,intercation,button):
+        v=scheview()
+        await intercation.response.send_modal(v)
+
+    
 
 ## 星座
 class luckview(View):

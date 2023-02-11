@@ -10,7 +10,7 @@ import constellation1
 import movie1
 import stock
 from api import calendar, database, sysini
-from api.calendar import schedule_meeting_time
+from api.calendar import schedule_meeting_time, update_calendar
 from config import ConfigParser
 
 embed = discord.Embed()
@@ -59,25 +59,67 @@ class scheview(Modal, title="calandar"):
         max_length=2,
         row=3,
     )
-    people = TextInput(
-        label="people",
-        style=discord.TextStyle.long,
-        placeholder="people",
-        default="None",
-        required=True,
-        max_length=30,
-        row=4,
-    )
+    member=sysini.client.get_all_members()
 
     async def on_submit(self, interaction: discord.Interaction):
         start_date = str(datetime.datetime.strptime(f"2020-{str(self.smonth)}-{str(self.sday)}", "%Y-%m-%d").date())
         end_date = str(datetime.datetime.strptime(f"2020-{str(self.emonth)}-{str(self.eday)}", "%Y-%m-%d").date())
-        members = ["Michael"]
+        members =[]
+
+        for i in self.member:
+             members.append( str(i.name) )
+        
         result = schedule_meeting_time(start_date, end_date, members)
         out = ""
         for i in result:
             out += str(i) + "\n"
         await interaction.response.send_message(out, ephemeral=True)
+
+
+class updatesche(Modal, title="calandar"):
+    def __init__(self):
+        super().__init__()
+        self.startmonth = 1
+        self.endmonth = 1
+        self.startday = 1
+        self.endday = 1
+
+    smonth = TextInput(
+        label="start month",
+        style=discord.TextStyle.short,
+        placeholder="1",
+        default="1",
+        required=True,
+        max_length=2,
+        row=0,
+    )
+    sday = TextInput(
+        label="start day",
+        style=discord.TextStyle.short,
+        placeholder="1",
+        default="1",
+        required=True,
+        max_length=2,
+        row=1,
+    )
+    time = TextInput(
+        label="time",
+        style=discord.TextStyle.short,
+        placeholder="am",
+        default="am",
+        required=True,
+        max_length=2,
+        row=2,
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        try:
+            start_date = str(datetime.datetime.strptime(f"2020-{str(self.smonth)}-{str(self.sday)}", "%Y-%m-%d").date())
+            update_calendar(start_date,str(self.time), str(interaction.user.name))
+        
+            await interaction.response.send_message("行程已送出", ephemeral=True)
+        except:
+            await interaction.response.send_message("格式有誤",ephemeral=True)
 
 
 # 假單
@@ -227,7 +269,8 @@ class menu(View):
     async def calendar(self, intercation, button):
         v = scheview()
         await intercation.response.send_modal(v)
-
+    
+    
 
 ## 星座
 class luckview(View):

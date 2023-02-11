@@ -69,7 +69,9 @@ async def book(interaction: discord.Interaction,cls: str ):
     ##list=booksearch(cls)
    # embed.set_thumbnail(url=)
 
-
+@sysini.tree.command(name='login-schedual',description='login schedual', guild=discord.Object(id=GUILD_ID))
+async def loginsche(intercation):
+    await intercation.response.send_modal(Myview.updatesche())
 
 
 

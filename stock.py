@@ -27,7 +27,7 @@ def query(company):
     },index=[company])
     
   
-    return(tabulate.tabulate(df,headers="keys",tablefmt="psql"))
+    return("``` \n"+tabulate.tabulate(df,headers="keys",tablefmt="psql")+"\n ```")
     print("-----------------------------------------------")
 
 #query("2330")

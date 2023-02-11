@@ -234,6 +234,7 @@ class menu(View):
     # 電影
     @discord.ui.button(label="new movie", style=discord.ButtonStyle.blurple)
     async def movie(self, interaction, button):
+        embed=discord.Embed()
         list = movie1.get_result()
         id = interaction.user.id
         user = sysini.client.get_user(id)
@@ -252,6 +253,7 @@ class menu(View):
     # 股票
     @discord.ui.button(label="check stock",style=discord.ButtonStyle.blurple)
     async def ch_stock(self,interaction,butoon):
+        embed=discord.Embed()
         with database.dbopen("./database.db") as c:
             c.execute("select * from stock")
             result=c.fetchall()
@@ -313,6 +315,7 @@ class bookmodal(Modal, title="書籍推薦"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
+        embed=discord.Embed()
         list = book2.query(str(self.cls))
         id = interaction.user.id
         user = sysini.client.get_user(id)
@@ -508,12 +511,12 @@ class votemodal(Modal, title="vote setting"):
 class rolldice(View):
     def __init__(self):
         super().__init__()
-
+        self.embed=discord.Embed()
     @discord.ui.button(label="roll", style=discord.ButtonStyle.red)
     async def roll(self, interaction, button):
         i = random.randint(1, 6)
 
         # 圖片自己找的 可修改
-        embed.set_thumbnail(url=ConfigParser()["image"][f"dice_{i}_url"])
+        self.embed.set_thumbnail(url=ConfigParser()["image"][f"dice_{i}_url"])
 
         await interaction.response.edit_message(embed=embed)

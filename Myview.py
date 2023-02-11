@@ -15,7 +15,7 @@ from config import ConfigParser
 
 embed = discord.Embed()
 ## 開會排程
-class scheview(Modal, title="calandar"):
+class scheview(Modal, title="calendar"):
     def __init__(self):
         super().__init__()
         self.startmonth = 1
@@ -76,7 +76,7 @@ class scheview(Modal, title="calandar"):
         await interaction.response.send_message(out, ephemeral=True)
 
 
-class updatesche(Modal, title="calandar"):
+class updatesche(Modal, title="calendar"):
     def __init__(self):
         super().__init__()
         self.startmonth = 1
